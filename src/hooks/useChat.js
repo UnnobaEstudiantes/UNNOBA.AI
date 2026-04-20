@@ -59,6 +59,10 @@ import {
 import { KNOWLEDGE_BASE } from "../utils/knowledgeBase";
 import { findBestMatch } from "../utils/textUtils"; //FUNCION QUE ALTERA OTRAS PREGUNTAS
 import { handleClassroomDistributionQuery } from "../utils/classroomDistribution";
+import {
+  queryAcademicRag,
+  getAcademicRagBaseUrl,
+} from "../services/academicRagClient.js";
 
 /*
 // Mapeo de carreras a sus funciones de endpoint y enlaces
@@ -866,6 +870,71 @@ export const useChat = () => {
 
     //Si el mensaje es vacio, termina la ejecucion y no procesa nada Gemini
     if (!msg) return;
+
+    // Opcional: asistente RAG (Colab / local vía VITE_ACADEMIC_RAG_URL)
+    const ragBase = getAcademicRagBaseUrl();
+    if (ragBase) {
+      setIsGenerating(true);
+      setStreamedResponse("");
+      setIsResponseScreen(true);
+    }
+
+    try {
+      const ragData = ragBase ? await queryAcademicRag(msg) : null;
+      if (ragData && !ragData.error) {
+        setMessages((prev) => [...prev, { type: "userMsg", text: msg }]);
+        setMessage("");
+        setIsResponseScreen(true);
+
+        let fullText = String(ragData.reply ?? "");
+        if (!fullText.trim()) {
+          fullText =
+            "El servicio RAG respondió sin contenido. Verificá el índice y los documentos en Colab.";
+        }
+
+        if (fullText.length > 0) {
+          setStreamedResponse(fullText.substring(0, 1));
+        }
+        let i = fullText.length > 0 ? 1 : 0;
+
+        const typingIntervalRag = setInterval(() => {
+          if (i < fullText.length) {
+            setStreamedResponse(fullText.substring(0, i + 1));
+            if (pausarUnnobaAi.current) {
+              clearInterval(typingIntervalRag);
+              const interruptedText =
+                fullText.substring(0, i) + ". Se ha interrumpido la respuesta.";
+              setMessages((prev) => [
+                ...prev,
+                { type: "responseMsg", text: interruptedText },
+              ]);
+              setIsGenerating(false);
+              pausarUnnobaAi.current = false;
+            }
+            if (saltosDeLinea.current) {
+              fullText = fullText.slice(0, i) + "\n" + fullText.slice(i);
+              saltosDeLinea.current = false;
+            }
+            i++;
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+          } else {
+            clearInterval(typingIntervalRag);
+            setMessages((prev) => [
+              ...prev,
+              { type: "responseMsg", text: fullText },
+            ]);
+            setStreamedResponse("");
+            setIsGenerating(false);
+          }
+        }, RESPONSE_TYPING_SPEED);
+        return;
+      }
+    } catch (e) {
+      console.warn("Asistente RAG (Colab) no disponible, usando flujo local:", e);
+      setIsGenerating(false);
+      setStreamedResponse("");
+      showError(e.message || "Error al consultar el RAG");
+    }
 
     //hook que indica que Gemini va a generar una respuesta es true
     setIsGenerating(true);
@@ -1919,6 +1988,15 @@ export const useChat = () => {
 
     //llamo a carrera detectada, que instancia otro modelo de gemini y le pregunta si en el
     //mensaje el usuario solicita algo relacionado al plan de estudios de alguna carrera de la unnoba.
+    if (!String(API_CONFIG.apiKey ?? "").trim()) {
+      setIsGenerating(false);
+      setStreamedResponse("");
+      showError(
+        "Falta VITE_GEMINI_API_KEY en el archivo .env. Sin la clave de Google AI Studio no puedo seguir después del asistente RAG."
+      );
+      return;
+    }
+
     const carreraDetectada = await detectarCarrera(msg);
     let contextoCarrera = ""; //vacio el contexto de carrera
 
@@ -2037,6 +2115,10 @@ export const useChat = () => {
           : responseText;
 
       let i = 0;
+      if (fullText.length > 0) {
+        setStreamedResponse(fullText.substring(0, 1));
+        i = 1;
+      }
       const typingInterval = setInterval(() => {
         if (i < fullText.length) {
           setStreamedResponse(fullText.substring(0, i + 1));
@@ -2069,6 +2151,12 @@ export const useChat = () => {
       }, RESPONSE_TYPING_SPEED);
     } catch (error) {
       console.error("Error generating response:", error);
+      setIsGenerating(false);
+      setStreamedResponse("");
+      showError(
+        error?.message ||
+          "No se pudo generar la respuesta. Revisá la API o iniciá un chat nuevo."
+      );
     }
   };
 
@@ -2113,7 +2201,17 @@ export const useChat = () => {
       setMessage("");
       return;
     } else {
-      generateResponse(message); //sino la genera a la respuesta
+      try {
+        await generateResponse(message);
+      } catch (err) {
+        console.error("generateResponse:", err);
+        setIsGenerating(false);
+        setStreamedResponse("");
+        showError(
+          err?.message ||
+            "Error al generar la respuesta. Revisá la clave de Gemini, la red o el servidor RAG."
+        );
+      }
     }
   };
   //elimina todos los mensajes y la referencia del chat la deja en null
