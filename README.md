@@ -12,8 +12,8 @@ UNNOBA.AI es un chatbot institucional desarrollado con **React.js**, **Tailwind 
 1. Clonar el repositorio:
 
 ```bash
-git clone https://github.com/FeliLucero1/IA-unnoba.git
-cd IA-unnoba
+git clone https://github.com/felijlucero/UNNOBA.AI.git
+cd UNNOBA.AI
 ```
 
 2. Instalar npm:
