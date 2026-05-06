@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { IoRestaurant, IoTime } from "react-icons/io5";
-import { BiPlanet } from "react-icons/bi";
-import { TbMessageChatbot } from "react-icons/tb";
+import { IoCalendar, IoLaptop, IoCreate, IoBook } from "react-icons/io5";
 import PropTypes from "prop-types";
 import Card from "../Card/Card";
 import { WELCOME_MESSAGE, TYPING_SPEED } from "../../utils/constants";
 import "./WelcomeScreen.css";
 
-const WelcomeScreen = ({ onCardClick }) => {
+const WelcomeScreen = ({ onCardClick, isGenerating = false }) => {
   const [displayedMessage, setDisplayedMessage] = useState("");
 
   useEffect(() => {
@@ -35,21 +33,20 @@ const WelcomeScreen = ({ onCardClick }) => {
 
   const cards = [
     {
-      question:
-        "¿Dónde puedo contactar a la universidad o cuáles son sus redes sociales?",
-      icon: <BiPlanet />,
+      question: "¿Cómo consulto el contenido o las unidades de la materia?",
+      icon: <IoBook />,
     },
     {
-      question: "¿Como utilizo la plataforma virtual o campus?",
-      icon: <TbMessageChatbot />,
+      question: "¿Dónde veo mi calendario académico?",
+      icon: <IoCalendar />,
     },
     {
       question: "¿Cómo y cuándo me inscribo a materias o finales?",
-      icon: <IoTime />,
+      icon: <IoCreate />,
     },
     {
-      question: "¿Cómo funciona el comedor?",
-      icon: <IoRestaurant />,
+      question: "¿Como utilizo la plataforma virtual o campus?",
+      icon: <IoLaptop />,
     },
   ];
 
@@ -71,6 +68,7 @@ const WelcomeScreen = ({ onCardClick }) => {
             question={item.question}
             icon={item.icon}
             onClick={onCardClick}
+            disabled={isGenerating}
           />
         ))}
       </div>
@@ -80,6 +78,7 @@ const WelcomeScreen = ({ onCardClick }) => {
 
 WelcomeScreen.propTypes = {
   onCardClick: PropTypes.func.isRequired,
+  isGenerating: PropTypes.bool,
 };
 
 export default WelcomeScreen;

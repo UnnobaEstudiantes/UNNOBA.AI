@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import {
   formatResponseText,
@@ -8,15 +7,6 @@ import {
 import "./MessageBubble.css";
 
 const MessageBubble = ({ message, isUser }) => {
-  const messageVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.3 },
-    },
-  };
-
   // Función para detectar el tipo de respuesta y aplicar el formateo apropiado
   const getFormattedMessage = (text) => {
     if (isUser) return text;
@@ -47,8 +37,7 @@ const MessageBubble = ({ message, isUser }) => {
   };
 
   return (
-    <motion.div
-      variants={messageVariants}
+    <div
       className={`message-bubble ${isUser ? "user-message" : "bot-message"}`}
       dangerouslySetInnerHTML={{
         __html: getFormattedMessage(message),

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./App.css";
 import "./reset.css";
@@ -6,12 +6,15 @@ import "./reset.css";
 // Hooks personalizados
 import { useTheme } from "./hooks/useTheme";
 import { useChat } from "./hooks/useChat";
+import { useAdmin } from "./hooks/useAdmin";
 
 // Componentes
 import Header from "./components/Header/Header";
 import WelcomeScreen from "./components/WelcomeScreen/WelcomeScreen";
 import ChatScreen from "./components/ChatScreen/ChatScreen";
 import InputBox from "./components/InputBox/InputBox";
+import LoginModal from "./components/LoginModal/LoginModal";
+import AdminPanel from "./components/AdminPanel/AdminPanel";
 
 // Constantes
 import { PREDEFINED_RESPONSES } from "./utils/constants";
@@ -35,6 +38,18 @@ const App = () => {
     addPredefinedResponse,
     stopGenerating,
   } = useChat();
+
+  const { enabled: adminEnabled, isAdmin, user: adminUser, login, logout } =
+    useAdmin();
+  /** No bloquea a alumnos: quien tenga la clave abre "Cargar material" y entra al panel. */
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
+
+  const onAdminLogout = useCallback(() => {
+    setAdminPanelOpen(false);
+    setLoginOpen(true);
+    logout();
+  }, [logout]);
 
   // Efectos para los eventos de teclado
   useEffect(() => {
@@ -69,6 +84,8 @@ const App = () => {
   }, [messages, streamedResponse, messagesEndRef]);
 
   const handleCardClick = (question) => {
+    if (isGenerating) return;
+
     const respuesta = PREDEFINED_RESPONSES[question];
 
     if (respuesta) {
@@ -101,6 +118,12 @@ const App = () => {
               onStop={stopGenerating}
               isGenerating={isGenerating}
               showNewChatButton={true}
+              adminEnabled={adminEnabled}
+              isAdmin={isAdmin}
+              sessionUser={adminUser}
+              onOpenLogin={() => setLoginOpen(true)}
+              onOpenAdminPanel={() => setAdminPanelOpen(true)}
+              onAdminLogout={onAdminLogout}
             />
             <ChatScreen
               messages={messages}
@@ -138,9 +161,18 @@ const App = () => {
                 toggleTheme={toggleTheme}
                 onStop={stopGenerating}
                 showNewChatButton={false}
+                adminEnabled={adminEnabled}
+                isAdmin={isAdmin}
+                sessionUser={adminUser}
+                onOpenLogin={() => setLoginOpen(true)}
+                onOpenAdminPanel={() => setAdminPanelOpen(true)}
+                onAdminLogout={onAdminLogout}
               />
             </div>
-            <WelcomeScreen onCardClick={handleCardClick} />
+            <WelcomeScreen
+              onCardClick={handleCardClick}
+              isGenerating={isGenerating}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -165,10 +197,26 @@ const App = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          Chatbot desarrollado para la UNNOBA con el objetivo de ayudar a los/as
-          estudiantes de la misma.
+          TPI 2025 · Sistemas Inteligentes. Asistente de consulta académica
+          (material de la cátedra e información UNNOBA). Integrantes: Ag.
+          Bascoy, B. Bertacchini, F. Figueroa, F. Lucero · Docentes: L. Esnaola,
+          J. P. Tessore.
         </motion.p>
       </motion.div>
+
+      {adminEnabled && (
+        <LoginModal
+          open={loginOpen}
+          onClose={() => setLoginOpen(false)}
+          onSubmit={login}
+        />
+      )}
+      {adminEnabled && isAdmin && (
+        <AdminPanel
+          open={adminPanelOpen}
+          onClose={() => setAdminPanelOpen(false)}
+        />
+      )}
     </div>
   );
 };

@@ -64,6 +64,43 @@ import {
   getAcademicRagBaseUrl,
 } from "../services/academicRagClient.js";
 
+/** Memoria de conversación hacia el RAG solo en el front: un único `message` con contexto. */
+const RAG_CONTEXT_MAX_MSGS = 8;
+const RAG_CONTEXT_MAX_CHARS = 5000;
+
+/**
+ * Incluye los últimos turnos (usuario/asistente) en el texto enviado a Colab.
+ * No cambia el API: sigue siendo un solo `message` en el POST.
+ */
+function buildRagQueryWithHistory(currentUserText, previousMessages) {
+  if (!previousMessages?.length) {
+    return currentUserText;
+  }
+  const lines = [];
+  for (const m of previousMessages) {
+    if (m.type === "userMsg") {
+      lines.push(`Usuario: ${m.text}`);
+    } else if (m.type === "responseMsg") {
+      lines.push(`Asistente: ${m.text}`);
+    }
+  }
+  const recent = lines.slice(-RAG_CONTEXT_MAX_MSGS);
+  let block = recent.join("\n\n");
+  if (block.length > RAG_CONTEXT_MAX_CHARS) {
+    block = "…\n" + block.slice(-(RAG_CONTEXT_MAX_CHARS - 2));
+  }
+  if (!block.trim()) {
+    return currentUserText;
+  }
+  return `Contexto reciente (para entender follow-ups; respondé solo con base en el material y lo dicho en este hilo si hace falta desambiguar):
+
+${block}
+
+---
+Pregunta actual:
+${currentUserText}`;
+}
+
 /*
 // Mapeo de carreras a sus funciones de endpoint y enlaces
 const CARRERAS_ENDPOINTS = {
@@ -880,7 +917,8 @@ export const useChat = () => {
     }
 
     try {
-      const ragData = ragBase ? await queryAcademicRag(msg) : null;
+      const ragQuery = buildRagQueryWithHistory(msg, messages);
+      const ragData = ragBase ? await queryAcademicRag(ragQuery) : null;
       if (ragData && !ragData.error) {
         setMessages((prev) => [...prev, { type: "userMsg", text: msg }]);
         setMessage("");
@@ -2219,6 +2257,8 @@ export const useChat = () => {
     setIsResponseScreen(false);
     setMessages([]);
     setPlanesCarreras([]);
+    setIsGenerating(false);
+    setStreamedResponse("");
     chat.current = null;
   };
   //Añade una respuesta predefinida al hook de mensajes.

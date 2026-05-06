@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
 import MessageBubble from "../MessageBubble/MessageBubble";
 import LoadingDots from "../LoadingDots/LoadingDots";
@@ -16,27 +16,11 @@ const ChatScreen = ({
   streamedResponse,
   messagesEndRef,
 }) => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const loadingVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        repeat: Infinity,
-        repeatType: "reverse",
-        duration: 0.8,
-      },
-    },
+  const appear = {
+    type: "spring",
+    stiffness: 420,
+    damping: 30,
+    mass: 0.6,
   };
 
   // Función para formatear respuestas en streaming
@@ -68,25 +52,32 @@ const ChatScreen = ({
   };
 
   return (
-    <motion.div
-      className="messages-container"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <div className="messages-container">
       <div className="messages-content">
-        {messages?.map((msg, index) => (
-          <MessageBubble
-            key={index}
-            message={msg.text}
-            isUser={msg.type === "userMsg"}
-          />
-        ))}
-        {isGenerating && streamedResponse && (
-          <div className="streaming-response">
+        <AnimatePresence initial={false}>
+          {messages?.map((msg, index) => (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              key={`m-${index}-${msg.type}`}
+              className="message-row"
+              data-user={msg.type === "userMsg" ? "true" : "false"}
+              initial={{ opacity: 0, y: 10, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={appear}
+            >
+              <MessageBubble
+                message={msg.text}
+                isUser={msg.type === "userMsg"}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        {isGenerating && streamedResponse && (
+          <div className="streaming-response message-row" data-user="false">
+            <motion.div
+              key="stream"
+              initial={{ opacity: 0, y: 8, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.2 }}
               className="bot-message streaming-message"
               dangerouslySetInnerHTML={{
                 __html: getFormattedStreamedResponse(streamedResponse),
@@ -96,18 +87,19 @@ const ChatScreen = ({
           </div>
         )}
         {isGenerating && !streamedResponse && (
-          <motion.div
-            variants={loadingVariants}
-            animate="visible"
-            initial="hidden"
-            className="bot-message loading-message"
-          >
-            <LoadingDots />
-          </motion.div>
+          <div className="message-row" data-user="false">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bot-message loading-message"
+            >
+              <LoadingDots />
+            </motion.div>
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-    </motion.div>
+    </div>
   );
 };
 

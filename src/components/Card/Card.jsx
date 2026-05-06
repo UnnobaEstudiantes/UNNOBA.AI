@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import "./Card.css";
 
-const Card = ({ question, icon, onClick, index }) => {
+const Card = ({ question, icon, onClick, index, disabled = false }) => {
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: (i) => ({
@@ -24,9 +24,12 @@ const Card = ({ question, icon, onClick, index }) => {
     <motion.div
       custom={index}
       variants={cardVariants}
-      whileHover="hover"
-      className="card"
-      onClick={() => onClick(question.split("\n").join(" "))}
+      whileHover={disabled ? undefined : "hover"}
+      className={`card${disabled ? " card--disabled" : ""}`}
+      onClick={() => {
+        if (disabled) return;
+        onClick(question.split("\n").join(" "));
+      }}
     >
       <p className="card-text">{question}</p>
       <div className="card-icon">{icon}</div>
@@ -39,6 +42,7 @@ Card.propTypes = {
   icon: PropTypes.node.isRequired,
   onClick: PropTypes.func.isRequired,
   index: PropTypes.number.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default Card;

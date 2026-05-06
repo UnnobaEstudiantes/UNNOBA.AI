@@ -1,21 +1,26 @@
 .input-container {
   width: 100%;
-  max-width: 60rem;
+  max-width: none;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: transparent;
 }
 
+/* Píldora acotada y centrada: el fondo del área inferior sigue siendo gris, no toda la franja blanca */
 .inputBox {
   transition: all 0.3s ease;
   background-color: var(--bg-card);
   border: 1px solid var(--accent-color);
   color: var(--text-primary);
   width: 100%;
+  max-width: min(42rem, 100%);
+  margin: 0 auto;
   display: flex;
   align-items: center;
   border-radius: 9999px;
   padding: 0.5rem 1rem;
+  box-shadow: 0 1px 3px var(--shadow-light);
 }
 
 .input-field {

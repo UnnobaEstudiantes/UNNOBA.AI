@@ -50,6 +50,26 @@ Si esa URL da “offline” en el navegador, la sesión de Colab se cortó o el 
 
 Con esta variable, cada mensaje intenta primero el RAG; si no hay URL o falla la petición, el chat sigue con la lógica local (Gemini y reglas del proyecto).
 
+**Cargar solo desde el front (sin arrastrar archivos en Colab):**
+
+1. En Colab: ejecutá el notebook hasta la **última celda** (API + ngrok) y copiá la URL que imprime.
+2. En `.env`: `VITE_ACADEMIC_RAG_URL=https://….ngrok-free.app` (sin comillas) y `VITE_ENABLE_ADMIN=true` + `VITE_ADMIN_KEY=…` para el botón *Cargar material*.
+3. Reiniciá `npm run dev`, abrí el chat, *Cargar material* → clave → *Cargar documentos*, elegí PDF/DOCX/etc., categoría y **Subir e indexar**. Los archivos van a `POST /v1/documents` en el mismo host que el chat; Colab los escribe en `data/` y reindexa (puede tardar). Mantené Colab abierto.
+
+El notebook tiene que incluir el endpoint `POST /v1/documents` (ver `colab/README.md`).
+
+**Coherencia con la bitácora (Fase 1, RF1–RF7):** la carga, fragmentación, embeddings, FAISS, validación temática, recuperación y generación viven en el **pipeline RAG (p. ej. Colab + `storage/`)** descrito en la bitácora. El **front React** es la interfaz de **consulta en lenguaje natural** (RF6–RF7 en uso) y, si activás el admin, un **panel de carga** acotado. El **diseño de la bitácora** (panel a la derecha, FAQ, aportes con etiqueta sugerida) es la **especificación**; la UI actual se centra en el chat y el panel de documentos bajo *Cargar material*.
+
+**Roles (bitácora vs. este repo):** la bitácora prevé que quien sube un archivo puede sugerir la **categoría temática** y el LLM la **valida** (RF5); eso aplica al **módulo de indexación en Python**, no a “cuentas de alumno” en el navegador. En el **front**, el *login* solo **habilita la pantalla de carga** para quien despliega o mantiene el material (un operador, docente o equipo con la clave del `.env`); **los alumnos** usan el chat **sin inicio de sesión**. Para un enlace compartido con toda la cursada, podés compilar con `VITE_ENABLE_ADMIN=false` y dejar el modo carga en otro entorno, o aceptar el botón *Cargar material* a la vista (la mayoría no lo usa).
+
+**Carga de material (TPI, opcional, prototipo):** en el encabezado aparece *Cargar material*: un solo campo **clave** (no hace falta usuario). Quien arme el `.env` pone la clave; el docente solo la ingresa. Opcional: `VITE_ADMIN_LABEL=Profesor` para mostrar un texto corto al lado cuando hay sesión (por defecto *Carga*). Reiniciá Vite. Es solo para el TPI; no reemplaza autenticación en servidor.
+
+```bash
+VITE_ENABLE_ADMIN=true
+VITE_ADMIN_KEY=la_clave_que_compartis_con_el_docente
+# opcional: VITE_ADMIN_LABEL=Profesor
+```
+
 5. Iniciar servidor de desarrollo:
 
 ```bash

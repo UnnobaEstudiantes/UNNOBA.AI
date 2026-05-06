@@ -21,6 +21,16 @@ vi.mock('./hooks/useTheme', () => ({
   }),
 }));
 
+vi.mock('./hooks/useAdmin', () => ({
+  useAdmin: () => ({
+    enabled: false,
+    isAdmin: false,
+    user: null,
+    login: () => ({ ok: false, error: 'Deshabilitado' }),
+    logout: vi.fn(),
+  }),
+}));
+
 vi.mock('./hooks/useChat', () => {
   // Utilizamos useState real para que el mensaje se actualice y el componente se re-renderice
   const React = require('react');
@@ -53,7 +63,8 @@ vi.mock('./utils/constants', () => ({
     '¿Cuándo son los exámenes?': 'Los exámenes son en...',
     '¿Cómo me inscribo?': 'Para inscribirte...',
   },
-  WELCOME_MESSAGE: "¡Hola! soy el asistente virtual de la unnoba, ¿En que puedo ayudarte?",
+    WELCOME_MESSAGE:
+      "Asistente de consulta académica: preguntas en lenguaje natural (fechas, cronograma, contenidos). Con RAG conectado, se prioriza el material de la materia. Escribí o tocá un atajo.",
   API_CONFIG: {
     apiKey: "test-key",
     model: "test-model",
@@ -76,7 +87,7 @@ describe('App - Test Simple', () => {
 
   it('muestra el título principal', () => {
     render(<App />);
-    expect(screen.getByText(/Chatbot desarrollado para la UNNOBA/i)).toBeInTheDocument();
+    expect(screen.getByText(/Integrantes: Ag\. Bascoy/i)).toBeInTheDocument();
   });
 
   it('muestra el input y el botón de enviar', () => {

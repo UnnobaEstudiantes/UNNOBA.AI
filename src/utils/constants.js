@@ -396,6 +396,14 @@ A: Completando este formulario: [URL DINÁMICO]
 `;
 
 export const PREDEFINED_RESPONSES = {
+  "¿Cómo funciona la consulta con RAG sobre los documentos de la materia?":
+    "Tu pregunta se **vectoriza**; en **FAISS** se recuperan los **chunks** más similares y, con ese **contexto**, un LLM (**Gemini** en nuestro prototipo) genera la respuesta (flujo **retrieval + generation** con **LlamaIndex**). Así se priorizan apuntes y programas de la asignatura frente a conocimiento general.",
+  "¿Qué es la validación de categoría temática asistida por IA?":
+    "Al cargar un documento, el usuario sugiere un **tema**. Un modelo compara el contenido con **categorías** válidas y, si hace falta, **corrije** la etiqueta, que queda en los metadatos. Eso ordena el corpus, mejora el filtrado (por unidad o tipo de material) y el seguimiento de **fuentes**.",
+  "¿Qué formatos de archivo soporta la carga e indexación?":
+    "En el TPI, el lector de documentos contempla, entre otros, **PDF**, **Word (DOCX)**, **planillas (CSV, Excel)**, **Markdown y texto**; luego se **fragmenta** y vectoriza. Los **PDF escaneados** (solo imagen) requieren OCR: sin texto extraíble, el sistema no indexa su contenido.",
+  "¿Cómo se almacenan el índice vectorial y las fuentes?":
+    "Los **embeddings** (p. ej. con *paraphrase-multilingual-mpnet-base-v2*, 768 dimensiones) y el índice **FAISS** se **persisten** (p. ej. carpeta `storage/`) junto con metadatos (archivo, tema) para **citar** al responder y soportar **re-indexación** incremental al actualizar `data/`.",
   "¿Dónde puedo contactar a la universidad o cuáles son sus redes sociales?":
     "**Redes de la Universidad**\nInstagram: @elegiunnoba o @unnobanoticias\nFacebook: NoticiasUNNOBA\nWeb: www.unnoba.edu.ar\n\n**Centro de estudiantes**\nVía Instagram:\nFranja Morada Junín: @franjaunnobajunin\nFranja Morada Pergamino: @franjamoradaunnoba\n\n**Contactos institucionales📧**\nestudiantes@unnoba.edu.ar\nTambién podés acercarte a Bienestar Estudiantil en tu sede.",
   "¿Cómo y cuándo me inscribo a materias o finales?":
@@ -408,6 +416,8 @@ export const PREDEFINED_RESPONSES = {
     "La inscripción a las materias se realiza desde **SIU-Guaraní** (https://g3w3.unnoba.edu.ar/g3w3/), dentro del período establecido en el calendario académico. Allí podrás seleccionar las materias que querés cursar este cuatrimestre.\n\n📅 Consultá las fechas exactas en el **Calendario Académico** (https://elegi.unnoba.edu.ar/calendario/)",
   "¿Dónde veo mi calendario académico?":
     "El calendario académico oficial de la UNNOBA está disponible en: **🔗 Calendario Académico UNNOBA** (https://elegi.unnoba.edu.ar/calendario/)\n\nAllí encontrarás todas las fechas importantes: inscripciones, inicio de clases, fechas de examen, feriados y más.",
+  "¿Cómo consulto el contenido o las unidades de la materia?":
+    "Escribí en el chat con **lenguaje natural** (por ejemplo: *unidad 2*, *qué pide el final*, *parcial*). **Si** el RAG con el **material indexado** (Colab/API) está activo y conectado, el sistema busca en los apuntes y programas; si no, podés seguir con respuestas generales o normativas (UNNOBA) según la configuración del asistente.",
   "¿Necesito ser alumno regular para inscribirme a materias?":
     "Sí, para poder inscribirte a materias es necesario tener la condición de **alumno regular**.\n\n📊 La regularidad se verifica a fines de marzo de cada año y requiere sumar al menos **4 puntos** durante el período anterior (combinando materias cursadas y finales aprobados).",
   "¿Cómo se suman puntos para mantener la regularidad?":
@@ -1378,7 +1388,7 @@ https://www.google.com.ar/maps/place/%22El+Taller%22,+Comedor+Universitario+UNNO
 };
 
 export const WELCOME_MESSAGE =
-  "¡Hola! soy el asistente virtual de la unnoba, ¿En que puedo ayudarte?";
+  "Asistente de consulta académica: preguntas en lenguaje natural (fechas, cronograma, contenidos). Con RAG conectado, se prioriza el material de la materia. Escribí o tocá un atajo.";
 
 export const API_CONFIG = {
   apiKey: import.meta.env.VITE_GEMINI_API_KEY || "",

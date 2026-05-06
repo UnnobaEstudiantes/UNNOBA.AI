@@ -28,6 +28,12 @@ const InputBox = ({ message, setMessage, onSend, isGenerating, error, onStop }) 
           className="input-field"
           placeholder="Escribe tu mensaje aquí..."
           disabled={isGenerating}
+          title={
+            isGenerating
+              ? "Esperá a que termine la respuesta o usá el botón para detener"
+              : undefined
+          }
+          aria-busy={isGenerating}
         />
 
         {message && !isGenerating && (

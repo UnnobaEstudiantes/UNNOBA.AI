@@ -1,0 +1,126 @@
+.login-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+
+.login-modal {
+  width: 100%;
+  max-width: 24rem;
+  padding: 1.5rem;
+  background: var(--bg-card, #fff);
+  color: var(--text-primary, #111);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px var(--shadow-medium, rgba(0, 0, 0, 0.2));
+  border: 1px solid var(--border-color, #e0e0e0);
+  box-sizing: border-box;
+}
+
+.login-modal-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent-color, #005b96);
+}
+
+.login-modal-hint {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-secondary, #666);
+}
+
+.login-modal-hint code {
+  font-size: 0.75em;
+  background: var(--bg-primary, #eee);
+  padding: 0.1em 0.3em;
+  border-radius: 0.25rem;
+}
+
+.login-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.login-modal-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary, #111);
+  margin-top: 0.35rem;
+}
+
+.login-modal-label:first-of-type {
+  margin-top: 0;
+}
+
+.login-modal-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 0.5rem;
+  background: var(--bg-primary, #f5f5f5);
+  color: var(--text-primary, #111);
+  outline: none;
+}
+
+.login-modal-input:focus {
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--accent-color, #005b96) 28%, transparent);
+  border-color: var(--accent-color, #005b96);
+}
+
+.login-modal-error {
+  font-size: 0.8rem;
+  color: #dc2626;
+  margin: 0.25rem 0 0;
+}
+
+.login-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.login-modal-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.login-modal-btn.primary {
+  background: var(--accent-color, #005b96);
+  color: #fff;
+}
+
+.login-modal-btn.primary:hover {
+  background: var(--accent-hover, #00467a);
+}
+
+.login-modal-btn.secondary {
+  background: transparent;
+  color: var(--text-secondary, #666);
+  border: 1px solid var(--border-color, #ccc);
+}
+
+.login-modal-btn:hover {
+  opacity: 0.95;
+}
+
+[data-theme="dark"] .login-modal {
+  color: var(--text-primary);
+}

@@ -18,6 +18,16 @@ const generateResponseMock = vi.fn();
 const toggleThemeMock = vi.fn();
 const newChatMock = vi.fn();
 
+vi.mock('../hooks/useAdmin', () => ({
+  useAdmin: () => ({
+    enabled: false,
+    isAdmin: false,
+    user: null,
+    login: () => ({ ok: false, error: 'Deshabilitado' }),
+    logout: vi.fn(),
+  }),
+}));
+
 // Mock del hook de tema
 vi.mock('../hooks/useTheme', () => ({
   useTheme: () => ({
@@ -163,6 +173,10 @@ describe('Integración: cambio de tema y nuevo chat', () => {
     expect(newChatMock).toHaveBeenCalledTimes(1);
 
     // La pantalla de bienvenida debe volver a mostrarse
-    expect(await screen.findByText(/¿Cómo y cuándo me inscribo a materias o finales\?/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        /¿Cómo consulto el contenido o las unidades de la materia\?/i
+      )
+    ).toBeInTheDocument();
   });
 }); 

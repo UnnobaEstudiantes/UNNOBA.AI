@@ -6,6 +6,8 @@ Usá **`colab/Asistente_RAG_API_Listo.ipynb`**: incluye el código RAG del asist
 
 En Colab → **Secretos** (llave): configurá el mismo nombre de API key de Gemini que usa el notebook (p. ej. `gemini_si`) y `NGROK_TOKEN` para ngrok.
 
+**Opcional — `HF_TOKEN` (Hugging Face):** si ves avisos de *unauthenticated requests* al bajar el modelo de embeddings, no suele impedir el uso (modelos públicos). Para menos límites de descarga, creá un token en [Hugging Face → Settings → Tokens](https://huggingface.co/settings/tokens), agregalo en Colab como secreto `HF_TOKEN` y reiniciá la sesión.
+
 ---
 
 ## Flujo manual (si seguís el notebook viejo)
@@ -43,8 +45,17 @@ El archivo `academic_rag_api_colab.py` **no se ejecuta solo**: asume que ya corr
 
 - `GET /health` — comprobación rápida.
 - `POST /v1/chat` — cuerpo JSON `{ "message": "..." }`, respuesta `{ "reply": "..." }` o `{ "error": "..." }`.
+- `POST /v1/documents` — `multipart/form-data`: repetir el campo **`files`** con cada archivo; campo opcional **`tema`** (categoría RF5, p. ej. `Material de estudio`). Los archivos se guardan en `data/` del Colab y se ejecuta `get_or_create_index` (puede tardar). El front **Cargar documentos** usa este endpoint con la misma `VITE_ACADEMIC_RAG_URL` que el chat.
+
+En Colab hace falta **`python-multipart`** (ya va en la primera celda de `Asistente_RAG_API_Listo.ipynb`).
 
 La sesión de Colab y el túnel ngrok **caducan** al cerrar el runtime; tendrás que repetir el paso 5 y actualizar `.env` con la nueva URL.
+
+### `RuntimeError: No hay índice RAG cargado` al correr la celda de ngrok
+
+Ese texto **solo aparece en notebooks viejos**. En el repo actual la última celda es otra y la celda 3 define **`NOTEBOOK_RAG_API_REV = 2`**. Si al ejecutar la última celda te dice que el notebook está **desactualizado**, Colab sigue abriendo un `.ipynb` viejo: subí otra vez `colab/Asistente_RAG_API_Listo.ipynb` desde el repo (reemplazando el archivo), *Reiniciar sesión* y *Ejecutar todo*.
+
+**Qué hace el notebook actualizado:** al final de la celda 3 se llama **`main()`** siempre; si `data/` está vacío se devuelve un **índice vacío** para poder levantar la API. La **última celda** vuelve a llamar a **`main()`** si falta `index` en memoria.
 
 ### Error `asyncio.run() cannot be called from a running event loop`
 
